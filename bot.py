@@ -1,8 +1,11 @@
 from flask import Flask, request
 import requests
 from twilio.twiml.messaging_response import MessagingResponse
+import ddg3
 
 app = Flask(__name__)
+
+# base = 'https://api.duckduckgo.com/?skip_disambig=1&format=json&pretty=1&q='
 
 @app.route('/bot', methods=['POST'])
 def bot():
@@ -10,26 +13,33 @@ def bot():
 	resp = MessagingResponse()
 	msg = resp.message()
 	responded = False
-	if 'quote' in incoming_msg:
-		print(incoming_msg)
-		# r = requests.get('https://api.quotable.io/random')
-		# if r.status_code==200:
-		# 	data = r.json()
-		# 	quote = f'{data["content"]}({data["author"]})'
-		# else:
-		# 	quote = 'I could not retrieve a quote at this time, sorry.'
 
-		msg.body("Nahi milega koi quote")
-		responded = True
-	if 'bhejde' in incoming_msg:
-		msg.body("kaha na nahi milega")
-		responded = True
-    	
-	# if 'cat' in incoming_msg:
-	# 	msg.media('https://cataas.com/cat')
-	# 	responded = True
-	# if not responded:
-	# 	msg.body('I only know about famous quotes and cats, sorry!')
+	r = ddg3.query(incoming_msg)
+	print(incoming_msg)
+	
+	if r.type=='answer':
+		res = r.results[0].text
+		url = r.results[0].url
+		msg.body(res+url)
+		responded=True
+
+	if r.type=='disambiguation':
+		res = r.related[6].text
+		url = r.related[0].url
+		msg.body(res+url)
+		responded=True
+
+	if r.type=='nothing':
+		res = r.answer.text
+		# url = r.related[0].url
+		msg.body(res)
+		responded=True
+
+	# res = r.related[2].text
+	# print(r,res)
+	# msg.body(res)
+	# responded = True
+
 		
 	return str(resp)
 
