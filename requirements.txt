@@ -12,6 +12,6 @@ pytz==2019.3
 requests==2.23.0
 six==1.14.0
 twilio==6.36.0
-urllib3==1.25.8
+urllib3==1.26.5
 Werkzeug==2.2.3
 chatterbot==1.0.5
